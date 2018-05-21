@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -27,9 +27,9 @@ namespace ssapj.PngDataExportFromBtwFile
                         var p = 0;
                         var pngData = new List<(int start, int length)> { };
 
-                        while (p < buffer.Length)
+                        while (p < readOnlyBuffer.Length)
                         {
-                            if (buffer[p] == 0x89 && buffer[p + 1] == 0x50 && buffer[p + 2] == 0x4e && buffer[p + 3] == 0x47 && buffer[p + 4] == 0x0d && buffer[p + 5] == 0x0a && buffer[p + 6] == 0x1a && buffer[p + 7] == 0x0a)
+                            if (readOnlyBuffer[p] == 0x89 && readOnlyBuffer[p + 1] == 0x50 && readOnlyBuffer[p + 2] == 0x4e && readOnlyBuffer[p + 3] == 0x47 && readOnlyBuffer[p + 4] == 0x0d && readOnlyBuffer[p + 5] == 0x0a && readOnlyBuffer[p + 6] == 0x1a && readOnlyBuffer[p + 7] == 0x0a)
                             {
                                 var start = p;
                                 (bool isOK, int length) range = (false, 0);
@@ -37,9 +37,9 @@ namespace ssapj.PngDataExportFromBtwFile
                                 //ヘッダー8バイト、IHDR25バイトとIDAT最小の12バイトはとりあえず飛ばす
                                 var p4End = p + 8 + 25 + 12;
 
-                                while (p4End < buffer.Length)
+                                while (p4End < readOnlyBuffer.Length)
                                 {
-                                    if (buffer[p4End] == 0x49 && buffer[p4End + 1] == 0x45 && buffer[p4End + 2] == 0x4e && buffer[p4End + 3] == 0x44)
+                                    if (readOnlyBuffer[p4End] == 0x49 && readOnlyBuffer[p4End + 1] == 0x45 && readOnlyBuffer[p4End + 2] == 0x4e && readOnlyBuffer[p4End + 3] == 0x44)
                                     {
                                         range = (true, p4End + 7 - start + 1);
                                         break;
@@ -72,7 +72,7 @@ namespace ssapj.PngDataExportFromBtwFile
                         //Others are raw png data in Templates. There are only in several old versions.
                         foreach (var (s, l) in pngData)
                         {
-                            var pngBytes = buffer.Slice(s, l).ToArray();
+                            var pngBytes = readOnlyBuffer.Slice(s, l).ToArray();
                             File.WriteAllBytes(Path.Combine(directory.FullName, $"{Path.GetFileNameWithoutExtension(btwFile)}_{counter}.png"), pngBytes);
                             counter++;
                         }
